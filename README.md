@@ -21,8 +21,8 @@ balance blocks 8-9
 | 4      | Empty                                             |
 | 5      | Empty                                             |
 | 6      | Empty                                             |
-| 7      |                                                   |
-| 8      |                                                   |
+| 7      | Appears to be transaction logs                    |
+| 8      | Appears to be transaction logs                    |
 | 9      | Unused                                            |
 | 10     | Unused                                            |
 | 11     | Unused                                            |
@@ -44,7 +44,7 @@ balance blocks 8-9
 |         | 5                                              | Empty if new card; otherwise bytes 00-03 are always `020002`, bytes 03-04 are static, bytes 05-06 unknown and change on operations, byte 07 is static, bytes 08-09 unknown and change on operations, byte 10 is static, bytes 12-14 are unknown and change on operations, byte 15 appears to be increasing with number of rides taken with the card | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |         | 6                                              | *Appears* to always be empty                                                                                                                                                                                                                                                                                                                        | `00000000000000000000000000000000` | No restrictions      |
 |         | 7                                              | 1st sector's trailer block, always `04000C0F09037E1788000B02070A0409`                                                                                                                                                                                                                                                                               | `04000C0F09037E1788000B02070A0409` | *Trailer*            |
-| 2       | 8                                              | Bytes 00-01 are unknown and change on operations, bytes 02-03 are always `0000`, bytes 04-05 are unknown and change on operations, bytes 06-07 are always `FFFF`, bytes 08-11 are always the same as bytes 00-03, bytes 12-15 are always `02FD02FD`                                                                                                 | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
+| 2       | 8                                              | Balance, see below; bytes 12-15 are static address, always `02FD02FD`                                                                                                                                                                                                                                                                               | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
 |         | 9                                              | Always has the same value as block 8                                                                                                                                                                                                                                                                                                                | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
 |         | 10                                             | Empty if new card; otherwise bytes 00-05 unknown, bytes 06-08 are always `010200`, bytes 11-14 are always `00006300`                                                                                                                                                                                                                                | `..,,..,,..,,010200..,,..02FD02FD` | No restrictions      |
 |         | 11                                             | 2nd sector's trailer block, always `04000C0F09034C378B000B02070A0409`                                                                                                                                                                                                                                                                               | `04000C0F09034C378B000B02070A0409` | *Trailer*            |
@@ -62,4 +62,22 @@ balance blocks 8-9
 
 [^1]: Value blocks have the following restrictions: Key A can read, decrement, restore and transfer, Key B can also write and increment.
 
-Blocks 8 and 9 store a 32-bit integer three times for redundancy: the value, its bitwise complement, then the value again.
+Value blocks 8, 9 and 34 store a 32-bit integer three times for redundancy: the value, its bitwise complement, then the value again.
+
+The balance is stored in blocks 8 and 9 for redundancy.
+
+## Balance
+
+€1.00 = 1000 units. For example, a balance of €5.00 would be stored as `8813000077ecffff8813000002fd02fd` in blocks 8 and 9:
+
+1. Convert `5.00` to units: `5000`
+2. Convert `5000` to hexadecimal: `1388`
+3. Convert to little-endian: `8813`
+4. Calculate the complement: `77ec` (flip every bit)
+5. Write the value, complement, and value again, then append the static address `02fd02fd` and write to blocks 8 and 9
+
+- Bytes 00-03: `88130000` -> little-endian -> `5000`
+- Bytes 04-07: `77ecffff` -> complement of `5000`
+- Bytes 08-11: `88130000` -> value repeated
+- Bytes 12-13: `02fd` -> address bytes (block pointer for transfer operations)
+- Bytes 14-15: `02fd` -> address bytes repeated
