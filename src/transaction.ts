@@ -3,7 +3,20 @@
  * @param transaction The 16-byte transaction record
  * @returns An object with the decoded transaction fields
  */
-export function decodeTransaction(transaction: Uint8Array) {
+export function decodeTransaction(transaction: Uint8Array): {
+	header: Uint8Array<ArrayBuffer>;
+	cardType: Uint8Array<ArrayBuffer>;
+	unknownVar1: Uint8Array<ArrayBuffer>;
+	line: number;
+	direction: number;
+	unknownVar2: Uint8Array<ArrayBuffer>;
+	createdAt: {
+		hour: number;
+		minute: number;
+		second: number;
+	};
+	sequence: number;
+} {
 	if (transaction.length !== 16) {
 		throw new Error(`Invalid transaction length: ${transaction.length}`);
 	}
