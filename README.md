@@ -6,6 +6,10 @@ Presented to you by [zaragoza ⚡️ nerds](https://discord.gg/NRdBaqv3hB) 🤓
 
 Huge thanks to [li0ard](https://li0ard.rest/) for help!
 
+Click here to open the reverse engineering spreadsheet with all the collected data and highlights:
+
+[![Spreadsheet](https://git.hloth.dev/hloth/zgz-avanza/raw/branch/main/docs/spreadsheet.avif)](https://docs.google.com/spreadsheets/d/1g89saB1URWRZLWsEJm44vJFTosIDfPkh5u8pfxPWGD0/edit)
+
 ## Keys
 
 | Sectors | Key A          | Key B          |
