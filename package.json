@@ -1,10 +1,40 @@
 {
-  "name": "zaragoza-bus-pwned",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+	"name": "zgz-avanza",
+	"version": "1.0.0",
+	"description": "Zaragoza Avanza transit pass card encoder & decoder",
+	"homepage": "https://git.hloth.dev/hloth/zgz-avanza",
+	"bugs": {
+		"url": "https://git.hloth.dev/hloth/zgz-avanza/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://git.hloth.dev/hloth/zgz-avanza.git"
+	},
+	"funding": "https://hloth.dev/donate",
+	"license": "MIT",
+	"author": "Viktor Shchelochkov <hi@hloth.dev> (https://hloth.dev)",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist/**/*.js",
+		"dist/**/*.d.ts",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"build": "rm -rf dist/ && tsc --project tsconfig.build.json"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@eslint/compat": "^2.0.2",
+		"@eslint/js": "^10.0.1",
+		"@types/bun": "latest",
+		"eslint-config-prettier": "^10.1.8",
+		"prettier": "^3.8.1",
+		"typescript-eslint": "^8.56.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
 }
