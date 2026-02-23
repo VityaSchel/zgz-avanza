@@ -45,7 +45,7 @@ Huge thanks to [li0ard](https://li0ard.rest/) for help!
 |         | 2                                              | Bytes 00-01 are always `4245` (`BE` in ASCII); Bytes 02-04 are Zaragoza card ID number (together forming `BE` + number); Bytes 05-14 are zeroed (likely for bigger integers); Byte 15 has unknown use but never changes                                                                                                                                                                       | `4245..,,..00000000000000000000..` | Read-only            |
 |         | 3                                              | [0th sector's trailer block](https://github.com/andrea-peter/nfc_mifare_classic_notes/blob/main/mifare-classic.md#sector-trailer-block), always `04000C0F09032C378D000B02070A0409` (first 6 bytes is Key A, then 4 bytes are AC, then Key B)                                                                                                                                                  | `04000C0F09032C378D000B02070A0409` | *Trailer*            |
 | 1       | 4                                              | *Appears* to always be empty                                                                                                                                                                                                                                                                                                                                                                  | `00000000000000000000000000000000` | Only Key B can write |
-|         | 5                                              | Empty if new card; otherwise bytes 00-03 are always `020002`, bytes 03-04 are unknown and constant per card, bytes 05-06 unknown and change on operations, byte 07 is static, bytes 08-09 unknown and change on operations, byte 10 is card-specific constant, byte 11 is BCD day-of-year, bytes 12-14 are BCD-encoded HH:MM:SS timestamp, byte 15 is transaction zero-based sequence counter | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
+|         | 5                                              | Empty if new card; otherwise bytes 00-03 are always `020002`, bytes 03-04 are unknown and constant per card, bytes 05-06 unknown, byte 07 is integer, bytes 08-11 unknown, bytes 12-14 are BCD-encoded HH:MM:SS timestamp, byte 15 is transaction zero-based sequence counter | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |         | 6                                              | *Appears* to always be empty                                                                                                                                                                                                                                                                                                                                                                  | `00000000000000000000000000000000` | No restrictions      |
 |         | 7                                              | 1st sector's trailer block, always `04000C0F09037E1788000B02070A0409`                                                                                                                                                                                                                                                                                                                         | `04000C0F09037E1788000B02070A0409` | *Trailer*            |
 | 2       | 8                                              | Balance, see below; bytes 12-15 are static address, always `02FD02FD`                                                                                                                                                                                                                                                                                                                         | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
@@ -85,6 +85,23 @@ The balance is stored in blocks 8 and 9 for redundancy.
 - Bytes 08-11: `88130000` -> value repeated
 - Bytes 12-13: `02fd` -> address bytes (block pointer for transfer operations)
 - Bytes 14-15: `02fd` -> address bytes repeated
+
+## Transaction logs
+
+Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
+
+- Bytes 00-02: Always `020002`
+- Byte 03-04: Appears to be a card type
+- Bytes 05-06: Unknown variable 1
+- Byte 07: Line number
+- Bytes 08: Line direction (either `01` or `02`)
+- Bytes 09-11: Unknown variable 2 (byte 10 is likely related to year/season[^2], byte 11 almost looks like date but does not correlate to sequence)
+- Byte 12: Hour (0-23)
+- Byte 13: Minute (0-59)
+- Byte 14: Second (0-59)
+- Byte 15: Transaction zero-based sequence counter
+
+[^2]: July 2021 is `42` and February 2026 is `52`. Perhaps, the year is divided in half to avoid overflowing the BCD-encoded day byte?
 
 ## License
 
