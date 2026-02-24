@@ -54,7 +54,7 @@ Click here to open the reverse engineering spreadsheet with all the collected da
 |         | 7                                              | 1st sector's trailer block, always `04000C0F09037E1788000B02070A0409`                                                                                                                                                                                                               | `04000C0F09037E1788000B02070A0409` | *Trailer*            |
 | 2       | 8                                              | See [balance](#balance)<br>[12-15] static address, always `02FD02FD`                                                                                                                                                                                                                | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
 |         | 9                                              | Always has the same value as block 8                                                                                                                                                                                                                                                | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
-|         | 10                                             | Empty if new card, correlates to block 5<br>[00-01] unknown<br>[02-05] same as [10-13] in block 5<br>[06-08] always `010200`<br>[09-10] same as [07-08] in block 5<br>[11-14] always `00006300`<br>[15] unknown                                                                     | `..,,..,,..,,010200..,,00006300AE` | No restrictions      |
+|         | 10                                             | Empty if new card, correlates to block 5 (see [Blocks 5 and 10](#blocks-5-and-10))<br>[00-01] unknown<br>[02-05] same as [10-13] in block 5<br>[06-08] always `010200`<br>[09-10] same as [07-08] in block 5<br>[11-14] always `00006300`<br>[15] unknown                           | `..,,..,,..,,010200..,,00006300AE` | No restrictions      |
 |         | 11                                             | 2nd sector's trailer block, always `04000C0F09034C378B000B02070A0409`                                                                                                                                                                                                               | `04000C0F09034C378B000B02070A0409` | *Trailer*            |
 | 3,4,5,6 | 12, 13, 14, 16, 17, 18, 20, 21, 22, 24, 25, 26 | Empty                                                                                                                                                                                                                                                                               | `00000000000000000000000000000000` | Only Key B can write |
 |         | 15, 19, 23, 27                                 | 3rd, 4th, 5th, 6th sector's trailer blocks, always `04000C0F0903787788000B02070A0409`                                                                                                                                                                                               | `04000C0F0903787788000B02070A0409` | *Trailer*            |
@@ -108,6 +108,46 @@ Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (bloc
 - Byte 15: Transaction zero-based sequence counter
 
 [^2]: July 2021 is `42` and February 2026 is `52`. Perhaps, the year is divided in half to avoid overflowing the BCD-encoded day byte?
+
+## Blocks 5 and 10
+
+Block 10 stores complimentary data to block 5, but unknown how it correlates.
+
+```text
+	00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+             cType ?? ?? linDr ?? yr d? HH MM SS sq
+5:  02 00 02 F8 01 06 40 D2 02 25 2A DC 09 1B 2F 01
+10: 00 00 2A DC 09 1B 01 02 00 D2 02 00 00 63 00 54
+    ?? ?? yr d? HH MM          linDr             ??
+
+             cType ?? ?? linDr ?? yr d? HH MM SS sq
+5:  02 00 02 F8 01 03 20 D2 01 FE 2A D8 13 2D 12 01
+10: 00 00 2A D8 13 2D 01 02 00 D2 01 00 00 63 00 7F
+    ?? ?? yr d? HH MM          linDr             ??
+ 
+             cType ?? ?? linDr ?? yr d? HH MM SS sq
+5:  02 00 02 F8 01 05 DC D2 02 6B 2A D9 0D 33 3B 02
+10: D2 01 2A D9 0D 33 01 02 00 D2 02 00 00 63 00 AE
+    ?? ?? yr d? HH MM          linDr             ??
+
+             cType ?? ?? linDr ?? yr d? HH MM SS sq
+5:  02 00 02 F8 01 02 BC D2 01 99 2A D9 10 26 0D 03
+10: D2 02 2A D9 10 26 01 02 00 D2 01 00 00 63 00 A6
+    ?? ?? yr d? HH MM          linDr             ??
+
+             cType ?? ?? linDr ?? yr d? HH MM SS sq
+5:  02 00 02 26 01 80 CE 16 01 0D 34 54 10 2D 24 03
+10: 23 02 34 54 10 2D 01 02 00 16 01 00 00 63 00 0B
+    ?? ?? yr d? HH MM          linDr             ??
+
+cType = some constant, could be related to season or card type
+linDr = line number and direction (either `01` or `02`)
+yr = related to year, see ^2 in footnotes
+d? = probably date in some form
+HH, MM, SS = hour, minute, second
+sq = sequence counter
+```
 
 ## Acknowledgements
 
