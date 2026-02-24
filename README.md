@@ -90,6 +90,8 @@ The balance is stored in blocks 8 and 9 for redundancy.
 - Bytes 12-13: `02fd` -> address bytes (block pointer for transfer operations)
 - Bytes 14-15: `02fd` -> address bytes repeated
 
+See [src/balance.ts](src/balance.ts) for encoder/decoder implementation in JavaScript/TypeScript.
+
 ## Transaction logs
 
 Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
@@ -106,6 +108,8 @@ Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (bloc
 - Byte 13: Minute (0-59)
 - Byte 14: Second (0-59)
 - Byte 15: Transaction zero-based sequence counter
+
+See [src/transaction.ts](src/transaction.ts) for decoder implementation in JavaScript/TypeScript.
 
 [^2]: July 2021 is `42` and February 2026 is `52`. Perhaps, the year is divided in half to avoid overflowing the BCD-encoded day byte?
 
