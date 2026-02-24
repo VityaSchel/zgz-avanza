@@ -1,5 +1,6 @@
 import { decodeTransaction } from "../src/transaction";
 
+// TODO: tests
 console.log(
 	decodeTransaction(Uint8Array.fromHex("02000226018001230209344E0C051B00")),
 );

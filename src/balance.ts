@@ -29,6 +29,9 @@ export function encodeBalance(units: number): Uint8Array {
  * @return The balance in units (0 to 2147483647). 1000 units = €1.00.
  */
 export function decodeBalance(block: Uint8Array): number {
+	if (block.length !== 16) {
+		throw new Error("Invalid balance block length: expected 16 bytes");
+	}
 	const value = block.subarray(0, 12);
 	const le = value.subarray(0, 4);
 	const aComplement = value.subarray(4, 8);

@@ -1,3 +1,5 @@
+// TODO: decode transactions format using more dumps
+
 /**
  * Decodes transaction from a 16-byte record
  * @param transaction The 16-byte transaction record
@@ -18,7 +20,7 @@ export function decodeTransaction(transaction: Uint8Array): {
 	sequence: number;
 } {
 	if (transaction.length !== 16) {
-		throw new Error(`Invalid transaction length: ${transaction.length}`);
+		throw new Error(`Invalid transaction length: expected 16 bytes`);
 	}
 	const header = transaction.slice(0, 3);
 	if (header[0] !== 0x02 || header[1] !== 0x00 || header[2] !== 0x02) {
