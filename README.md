@@ -54,7 +54,7 @@ Click here to open the reverse engineering spreadsheet with all the collected da
 |         | 7                                              | 1st sector's trailer block, always `04000C0F09037E1788000B02070A0409`                                                                                                                                                                                                         | `04000C0F09037E1788000B02070A0409` | *Trailer*            |
 | 2       | 8                                              | Balance, see below; bytes 12-15 are static address, always `02FD02FD`                                                                                                                                                                                                         | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
 |         | 9                                              | Always has the same value as block 8                                                                                                                                                                                                                                          | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
-|         | 10                                             | Empty if new card; otherwise bytes 00-05 unknown, bytes 06-08 are always `010200`, bytes 11-14 are always `00006300`                                                                                                                                                          | `..,,..,,..,,010200..,,..02FD02FD` | No restrictions      |
+|         | 10                                             | Empty if new card, correlates to block 5; bytes 00-01 unknown, bytes 02-05 are the same as bytes 10-13 in block 5, bytes 06-08 are always `010200`, bytes 09-10 are always the same as bytes 07-08 in block 5, bytes 11-14 are always `00006300`, byte 15 unknown             | `..,,..,,..,,010200..,,00006300AE` | No restrictions      |
 |         | 11                                             | 2nd sector's trailer block, always `04000C0F09034C378B000B02070A0409`                                                                                                                                                                                                         | `04000C0F09034C378B000B02070A0409` | *Trailer*            |
 | 3,4,5,6 | 12, 13, 14, 16, 17, 18, 20, 21, 22, 24, 25, 26 | Empty                                                                                                                                                                                                                                                                         | `00000000000000000000000000000000` | Only Key B can write |
 |         | 15, 19, 23, 27                                 | 3rd, 4th, 5th, 6th sector's trailer blocks, always `04000C0F0903787788000B02070A0409`                                                                                                                                                                                         | `04000C0F0903787788000B02070A0409` | *Trailer*            |
@@ -99,7 +99,9 @@ Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (bloc
 - Bytes 05-06: Unknown variable 1
 - Byte 07: Line number
 - Bytes 08: Line direction (either `01` or `02`)
-- Bytes 09-11: Unknown variable 2 (byte 10 is likely related to year/season[^2], byte 11 almost looks like date but does not correlate to sequence)
+- Bytes 09: Unknown variable 2
+- Byte 10: Likely related to year/season[^2]
+- Byte 11: Almost looks like date but does not correlate to sequence counter
 - Byte 12: Hour (0-23)
 - Byte 13: Minute (0-59)
 - Byte 14: Second (0-59)

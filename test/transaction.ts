@@ -1,14 +1,33 @@
 import { decodeTransaction } from "../src/transaction";
 
-console.log(decodeTransaction(Uint8Array.fromHex("02000226018001230209344E0C051B00")))
-console.log(decodeTransaction(Uint8Array.fromHex("0200022601817F160105344E0D1F2001")))
-console.log(decodeTransaction(Uint8Array.fromHex("0200022601801E23020934540F153502")))
-console.log(decodeTransaction(Uint8Array.fromHex("0200022601817E1F0211344D10163003")))
-console.log(decodeTransaction(Uint8Array.fromHex("020002260180011F0112344D14100704")))
-console.log("")
-console.log("---")
-console.log("")
-console.log(decodeTransaction(Uint8Array.fromHex("020002F8010320D201FE2AD8132D1201")))
-console.log(decodeTransaction(Uint8Array.fromHex("020002F80105DCD2026B2AD90D333B02")))
-console.log("---")
-console.log(decodeTransaction(Uint8Array.fromHex("020002F8010640D202252ADC091B2F01")))
+console.log(
+	decodeTransaction(Uint8Array.fromHex("02000226018001230209344E0C051B00")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("0200022601817F160105344E0D1F2001")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("0200022601801E23020934540F153502")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("0200022601817E1F0211344D10163003")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("020002260180011F0112344D14100704")),
+);
+console.log("");
+console.log("---");
+console.log("");
+console.log(
+	decodeTransaction(Uint8Array.fromHex("020002F8010320D201FE2AD8132D1201")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("020002F80105DCD2026B2AD90D333B02")),
+);
+console.log(
+	decodeTransaction(Uint8Array.fromHex("020002F80102BCD201992AD910260D03")),
+);
+console.log("---");
+console.log(
+	decodeTransaction(Uint8Array.fromHex("020002F8010640D202252ADC091B2F01")),
+);
