@@ -1,4 +1,10 @@
-# Zaragoza Bus Transit Pass pwn
+# Zaragoza Avanza Bus Transit Pass pwn
+
+> [!IMPORTANT]
+> ⚠️ **Aviso legal:** Este repositorio es un proyecto de investigación de seguridad independiente.  \
+> No está destinado a cometer fraude ni a facilitar el uso indebido del transporte público. \
+> No se proporcionará asistencia para ningún uso ilícito. \
+> Consulta [LEGAL.md](./LEGAL.md) para el descargo de responsabilidad completo.
 
 Below are some of my notes on the Zaragoza bus transit pass, which is a MIFARE Classic 1K card. The card has 16 sectors, each with 4 blocks of 16 bytes each. Each sector has two keys (Key A and Key B) that control access to the blocks within that sector.
 
@@ -10,6 +16,9 @@ Click here to open the reverse engineering spreadsheet with all the collected da
 	<img alt="Spreadsheet" src="https://git.hloth.dev/hloth/zgz-avanza/raw/branch/main/docs/spreadsheet.avif" width="600" />
 </a>
 
+See also:
+- [ZGZ Avanza Card Android App](https://git.hloth.dev/hloth/zgz-avanza-card-android)
+
 ## Keys
 
 | Sectors | Key A          | Key B          |
@@ -20,25 +29,25 @@ Click here to open the reverse engineering spreadsheet with all the collected da
 
 ## Sectors
 
-| Sector | Description                                       |
-| ------ | ------------------------------------------------- |
-| 0      | Manufacturer block, IDs                           |
-| 1      | Unknown; Appears to be empty (nulls) on new cards |
-| 2      | Balance (blocks 8 and 9)                          |
-| 3      | Empty                                             |
-| 4      | Empty                                             |
-| 5      | Empty                                             |
-| 6      | Empty                                             |
-| 7      | Appears to be transaction logs                    |
-| 8      | Appears to be transaction logs                    |
-| 9      | Unused                                            |
-| 10     | Unused                                            |
-| 11     | Unused                                            |
-| 12     | Unused                                            |
-| 13     | Unused                                            |
-| 14     | Unused                                            |
-| 15     | Unused                                            |
-|        |                                                   |
+| Sector | Description                      |
+| ------ | -------------------------------- |
+| 0      | Manufacturer block, IDs          |
+| 1      | Appears to be latest transaction |
+| 2      | Balance (blocks 8 and 9)         |
+| 3      | Empty                            |
+| 4      | Empty                            |
+| 5      | Empty                            |
+| 6      | Empty                            |
+| 7      | Appears to be transaction logs   |
+| 8      | Appears to be transaction logs   |
+| 9      | Unused                           |
+| 10     | Unused                           |
+| 11     | Unused                           |
+| 12     | Unused                           |
+| 13     | Unused                           |
+| 14     | Unused                           |
+| 15     | Unused                           |
+|        |                                  |
 
 ## Blocks
 
