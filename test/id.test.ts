@@ -14,7 +14,11 @@ const tests = [
 		encoded: "4245739977000000000000000000009A",
 		decoded: "BE739977",
 	},
-]
+	{
+		encoded: "42504232450000000000000000000027",
+		decoded: "BP423245",
+	},
+];
 
 it("should decode id", () => {
 	for (const { encoded, decoded } of tests) {

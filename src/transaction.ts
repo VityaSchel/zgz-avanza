@@ -22,10 +22,10 @@ export function decodeTransaction(transaction: Uint8Array): {
 	if (transaction.length !== 16) {
 		throw new Error(`Invalid transaction length: expected 16 bytes`);
 	}
-	const header = transaction.slice(0, 3);
-	if (header[0] !== 0x02 || header[1] !== 0x00 || header[2] !== 0x02) {
+	const header = transaction.slice(0, 3).reduce((acc, byte) => (acc << 8) | byte, 0);
+	if (header !== 0x020002 && header !== 0x0A0100 && header !== 0x0A0200) {
 		throw new Error(
-			`Unknown transaction record marker: ${header.toHex()} (bytes 0-2)`,
+			`Unknown transaction record marker: ${header.toString(16)} (bytes 0-2)`,
 		);
 	}
 	const cardType = transaction.slice(3, 5);

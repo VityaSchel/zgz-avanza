@@ -10,6 +10,10 @@ const tests = [
 		balance: 5000,
 		encoded: "8813000077ECFFFF8813000002FD02FD",
 	},
+	{
+		balance: 0,
+		encoded: "00000000FFFFFFFF0000000002FD02FD",
+	},
 ];
 
 it("should decode balance", () => {
