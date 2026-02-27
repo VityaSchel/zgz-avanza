@@ -58,7 +58,7 @@ See also:
 |        | 2     | [00-01] ASCII prefix (`4245` for `BE`, `4250` for `BP`)<br>[02-04] Zaragoza card ID number (together forming prefix + number)<br>[05-14] empty, zeroed<br>[15] XOR of all previous bytes                                                                                                                                                                                | `42,,..,,..00000000000000000000..` | Read-only            |
 |        | 3     | [0th sector's trailer block](https://github.com/andrea-peter/nfc_mifare_classic_notes/blob/main/mifare-classic.md#sector-trailer-block)                                                                                                                                                                                                                                 | `04000C0F0903..,,..,,0B02070A0409` | *Trailer*            |
 | 1      | 4     | Empty on top-up cards<br>[00-14] unknown<br>[15] XOR of all previous bytes                                                                                                                                                                                                                                                                                              | `00000000000000000000000000000000` | Only Key B can write |
-|        | 5     | Empty if new card<br>[00-02] always `020002` for top up cards and `0A0100` or `0A0200` for personal cards<br>[03-04] unknown card-specific constant<br>[05-06] unknown<br>[07] integer<br>[08] either 01 or 02<br>[09] unknown<br>[10-11] [date](#dates)<br>[12] BCD-encoded hour (0-23)<br>[13] BCD-encoded minute<br>[14] BCD-encoded second<br>[15] sequence counter | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
+|        | 5     | Empty if new card<br>[00-02] `020002`, `0A0100` or `0A0200`<br>[03-04] unknown card-specific constant<br>[05-06] unknown<br>[07] integer<br>[08] either 01 or 02<br>[09] unknown<br>[10-11] [date](#dates)<br>[12] BCD-encoded hour (0-23)<br>[13] BCD-encoded minute<br>[14] BCD-encoded second<br>[15] sequence counter | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |        | 6     | *Appears* to always be empty                                                                                                                                                                                                                                                                                                                                            | `00000000000000000000000000000000` | No restrictions      |
 |        | 7     | 1st sector's trailer block                                                                                                                                                                                                                                                                                                                                              | `04000C0F0903..,,..,,0B02070A0409` | *Trailer*            |
 | 2      | 8     | [Balance](#balance)                                                                                                                                                                                                                                                                                                                                                     | `..,,0000..,,FFFF..,,000002FD02FD` | Value block[^1]      |
@@ -121,24 +121,24 @@ See [src/balance.ts](src/balance.ts) for encoder/decoder implementation in JavaS
 
 Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
 
-- [00-02]: Always `020002`
-- [03-04]: Card-specific constant
-- [05-06]: Unknown variable 1
-- [07]: Line number
-- [08]: Line direction (either `01` or `02`)
-- [09]: Unknown variable 2
-- [10-11]: [Date](#dates)
+- [00-02]: Always `020002` for top up cards and `0A0100` or `0A0200` for personal cards
+- [03-04]: Card-specific constant, same across BE322742 and BE322743 dumps, could be related to fare id or season
+- [05-06]: Unknown, highest recorded value for first byte is 129, several appearances of (128, 1)
+- [07]: Most likely bus line number, but unknown how to decode lines > 255 and trams
+- [08]: Line direction (always either `01` or `02`)
+- [09]: Unknown
+- [10-11]: Transaction [date](#dates)
 - [12]: Hour (0-23)
 - [13]: Minute (0-59)
 - [14]: Second (0-59)
-- [15]: Transaction zero-based sequence counter
+- [15]: Unknown, some sort of sequence counter but doesn't correlate to dates
 
 See [src/transaction.ts](src/transaction.ts) for decoder implementation in JavaScript/TypeScript.
 
 ## Subscription
 
-- [00-01] Start [date](#dates)
-- [02-03] End date
+- [00-01] Subscription start [date](#dates)
+- [02-03] Subscription end date
 - [04-05] Unknown, appears to be `0000`
 - [06-09] Unknown
 - [10-11] Unknown date, most likely the date of the last usage
@@ -149,9 +149,9 @@ See [src/transaction.ts](src/transaction.ts) for decoder implementation in JavaS
 
 - [00-01] Unknown
 - [02-03] Some [date](#dates)
-- [04-07] Appears to always be `00210000`
+- [04-07] Unknown, appears to always be `00210000`
 - [08-09] Validity days (e.g. `016D` for 365 days)
-- [10-14] Appears to always be `0021000000`
+- [10-14] Unknown, appears to always be `0021000000`
 - [15] XOR of all previous bytes
 
 ## Dates
@@ -160,7 +160,7 @@ Mad respect to [li0ard](https://li0ard.rest/) for figuring out the date encoding
 
 Dates are composed of two bytes (16 bits), which when converted to binary:
 - the first 7 bits represent the year (based 0 at 2000)
-- 4 bits for month
+- 4 bits for month (1-12)
 - 5 bits for day
 
 Examples:

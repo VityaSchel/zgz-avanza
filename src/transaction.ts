@@ -1,6 +1,6 @@
 // TODO: decode transactions format using more dumps
 
-import { decodeDate, type Date16Bit } from "./date";
+import { decodeDate } from "./date";
 
 export type Transaction = {
 	header: number;
@@ -10,7 +10,9 @@ export type Transaction = {
 	direction: number;
 	unknownVar2: Uint8Array<ArrayBuffer>;
 	createdAt: {
-		date: Date16Bit;
+		year: number;
+		month: number;
+		day: number;
 		hour: number;
 		minute: number;
 		second: number;
@@ -46,18 +48,19 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 		throw new Error(`Invalid transaction direction: ${direction} (byte 8)`);
 	}
 	const unknownVar2 = transaction.slice(9, 10);
-	const date = decodeDate(transaction.slice(10, 12));
-	const bcdHour = transaction.slice(12, 13)[0];
-	if (bcdHour === undefined || bcdHour > 24) {
-		throw new Error(`Invalid transaction hour: ${bcdHour} (byte 12)`);
+	const date = transaction.slice(10, 12);
+	const { year, month, day } = decodeDate(date);
+	const hour = transaction.slice(12, 13)[0];
+	if (hour === undefined || hour > 24) {
+		throw new Error(`Invalid transaction hour: ${hour} (byte 12)`);
 	}
-	const bcdMinute = transaction.slice(13, 14)[0];
-	if (bcdMinute === undefined || bcdMinute > 60) {
-		throw new Error(`Invalid transaction minute: ${bcdMinute} (byte 13)`);
+	const minute = transaction.slice(13, 14)[0];
+	if (minute === undefined || minute > 60) {
+		throw new Error(`Invalid transaction minute: ${minute} (byte 13)`);
 	}
-	const bcdSecond = transaction.slice(14, 15)[0];
-	if (bcdSecond === undefined || bcdSecond > 60) {
-		throw new Error(`Invalid transaction second: ${bcdSecond} (byte 14)`);
+	const second = transaction.slice(14, 15)[0];
+	if (second === undefined || second > 60) {
+		throw new Error(`Invalid transaction second: ${second} (byte 14)`);
 	}
 	const seq = transaction.slice(15, 16)[0];
 	if (seq === undefined) {
@@ -71,10 +74,12 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 		direction,
 		unknownVar2,
 		createdAt: {
-			date,
-			hour: bcdHour,
-			minute: bcdMinute,
-			second: bcdSecond,
+			year,
+			month,
+			day,
+			hour,
+			minute,
+			second,
 		},
 		sequence: seq,
 	};
