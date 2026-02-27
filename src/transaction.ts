@@ -1,11 +1,8 @@
 // TODO: decode transactions format using more dumps
 
-/**
- * Decodes transaction from a 16-byte record
- * @param transaction The 16-byte transaction record
- * @returns An object with the decoded transaction fields
- */
-export function decodeTransaction(transaction: Uint8Array): {
+import { decodeDate, type Date16Bit } from "./date";
+
+export type Transaction = {
 	header: number;
 	cardType: Uint8Array<ArrayBuffer>;
 	unknownVar1: Uint8Array<ArrayBuffer>;
@@ -13,17 +10,27 @@ export function decodeTransaction(transaction: Uint8Array): {
 	direction: number;
 	unknownVar2: Uint8Array<ArrayBuffer>;
 	createdAt: {
+		date: Date16Bit;
 		hour: number;
 		minute: number;
 		second: number;
 	};
 	sequence: number;
-} {
+};
+
+/**
+ * Decodes transaction from a 16-byte record
+ * @param transaction The 16-byte transaction record
+ * @returns An object with the decoded transaction fields
+ */
+export function decodeTransaction(transaction: Uint8Array): Transaction {
 	if (transaction.length !== 16) {
 		throw new Error(`Invalid transaction length: expected 16 bytes`);
 	}
-	const header = transaction.slice(0, 3).reduce((acc, byte) => (acc << 8) | byte, 0);
-	if (header !== 0x020002 && header !== 0x0A0100 && header !== 0x0A0200) {
+	const header = transaction
+		.slice(0, 3)
+		.reduce((acc, byte) => (acc << 8) | byte, 0);
+	if (header !== 0x020002 && header !== 0x0a0100 && header !== 0x0a0200) {
 		throw new Error(
 			`Unknown transaction record marker: ${header.toString(16)} (bytes 0-2)`,
 		);
@@ -38,7 +45,8 @@ export function decodeTransaction(transaction: Uint8Array): {
 	if (direction === undefined || (direction !== 1 && direction !== 2)) {
 		throw new Error(`Invalid transaction direction: ${direction} (byte 8)`);
 	}
-	const unknownVar2 = transaction.slice(9, 12);
+	const unknownVar2 = transaction.slice(9, 10);
+	const date = decodeDate(transaction.slice(10, 12));
 	const bcdHour = transaction.slice(12, 13)[0];
 	if (bcdHour === undefined || bcdHour > 24) {
 		throw new Error(`Invalid transaction hour: ${bcdHour} (byte 12)`);
@@ -63,6 +71,7 @@ export function decodeTransaction(transaction: Uint8Array): {
 		direction,
 		unknownVar2,
 		createdAt: {
+			date,
 			hour: bcdHour,
 			minute: bcdMinute,
 			second: bcdSecond,
