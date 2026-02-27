@@ -6,7 +6,7 @@
  * @returns An object with the decoded transaction fields
  */
 export function decodeTransaction(transaction: Uint8Array): {
-	header: Uint8Array<ArrayBuffer>;
+	header: number;
 	cardType: Uint8Array<ArrayBuffer>;
 	unknownVar1: Uint8Array<ArrayBuffer>;
 	line: number;
