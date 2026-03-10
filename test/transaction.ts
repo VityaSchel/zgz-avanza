@@ -30,7 +30,6 @@ export function log(transaction: Transaction) {
 	);
 }
 
-console.log("---");
 console.log("BE322743");
 log(decodeTransaction(Uint8Array.fromHex("020002F8010320D201FE2AD8132D1201")));
 log(decodeTransaction(Uint8Array.fromHex("020002F80105DCD2026B2AD90D333B02")));

@@ -121,18 +121,18 @@ See [src/balance.ts](src/balance.ts) for encoder/decoder implementation in JavaS
 
 Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
 
-- [00-02]: Always `020002` for top up cards and `0A0200` for personal cards; sometimes `020000` for top up cards and `0A0100` for personal cards, cause unknown
-- [03]: Unknown constant, could be a fare id or season id, always `00` on personal cards
-- [04]: Consecutive payments counter starting from 1 (for transactions paid in the same terminal in a row)
-- [05-06]: Unknown, could be terminal id or stop id
-- [07]: Most likely bus line number, but unknown how to decode lines > 255 and trams
-- [08]: Line direction (always either `01` or `02`)
-- [09]: Unknown, could be number of times the bus has reversed/terminal restarted or number of stops passed by bus
-- [10-11]: Transaction [date](#dates)
-- [12]: Hour (0-23)
-- [13]: Minute (0-59)
-- [14]: Second (0-59)
-- [15]: Sequence counter that increments from 0 to 4 (both ends inclusive) and then loops back to 0 correlating with transactions order
+- [00-02] Always `020002` for top up cards and `0A0200` for personal cards; sometimes `020000` for top up cards and `0A0100` for personal cards, cause unknown
+- [03] Unknown constant, could be a fare id or season id, always `00` on personal cards
+- [04] Consecutive payments counter starting from 1 (for transactions paid in the same terminal in a row)
+- [05-06] Unknown, could be terminal id or stop id
+- [07] Most likely bus line number, but unknown how to decode lines > 255 and trams
+- [08] Line direction (always either `01` or `02`)
+- [09] Unknown, could be number of times the bus has reversed/terminal restarted or number of stops passed by bus
+- [10-11] Transaction [date](#dates)
+- [12] Hour (0-23)
+- [13] Minute (0-59)
+- [14] Second (0-59)
+- [15] Sequence counter that increments from 0 to 4 (both ends inclusive) and then loops back to 0 correlating with transactions order
 
 See [src/transaction.ts](src/transaction.ts) for decoder implementation in JavaScript/TypeScript.
 
