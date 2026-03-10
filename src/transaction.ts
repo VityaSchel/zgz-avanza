@@ -1,12 +1,14 @@
-// TODO: decode transactions format using more dumps
-
 import { decodeDate } from "./date";
 
 export type Transaction = {
 	header: number;
-	cardType: Uint8Array<ArrayBuffer>;
+	/** Always 0 on personal unlimited cards */
+	fareId: number;
+	/** Starts from 1 */
+	consecutivePaymentsCounter: number;
 	unknownVar1: Uint8Array<ArrayBuffer>;
 	line: number;
+	/** Always either 1 or 2 */
 	direction: number;
 	unknownVar2: Uint8Array<ArrayBuffer>;
 	createdAt: {
@@ -17,6 +19,7 @@ export type Transaction = {
 		minute: number;
 		second: number;
 	};
+	/** Starts with 0 and increments with each transaction until 4 (inclusive), after that loops back to 0 */
 	sequence: number;
 };
 
@@ -32,12 +35,27 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 	const header = transaction
 		.slice(0, 3)
 		.reduce((acc, byte) => (acc << 8) | byte, 0);
-	if (header !== 0x020002 && header !== 0x0a0100 && header !== 0x0a0200) {
+	if (
+		header !== 0x020002 &&
+		header !== 0x020000 &&
+		header !== 0x0a0200 &&
+		header !== 0x0a0100
+	) {
 		throw new Error(
 			`Unknown transaction record marker: ${header.toString(16)} (bytes 0-2)`,
 		);
 	}
-	const cardType = transaction.slice(3, 5);
+	const fareId = transaction.slice(3, 4)[0];
+	if (fareId === undefined) {
+		throw new Error(`Invalid fare id: ${fareId} (byte 3)`);
+	}
+	const consecutivePaymentsCounter = transaction.slice(4, 5)[0];
+	if (
+		consecutivePaymentsCounter === undefined ||
+		consecutivePaymentsCounter < 1
+	) {
+		throw new Error(`Invalid consecutive payments counter: ${fareId} (byte 4)`);
+	}
 	const unknownVar1 = transaction.slice(5, 7);
 	const line = transaction.slice(7, 8)[0];
 	if (line === undefined) {
@@ -68,7 +86,8 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 	}
 	return {
 		header,
-		cardType,
+		fareId,
+		consecutivePaymentsCounter,
 		unknownVar1,
 		line,
 		direction,
