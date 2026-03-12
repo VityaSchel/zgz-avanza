@@ -6,20 +6,57 @@
 > No se proporcionará asistencia para ningún uso ilícito. \
 > Consulta [LEGAL.md](./LEGAL.md) para el descargo de responsabilidad completo.
 
-Below are some of my notes on the Zaragoza bus transit pass, which is a MIFARE Classic 1K card. The card has 16 sectors, each with 4 blocks of 16 bytes each. Each sector has two keys (Key A and Key B) that control access to the blocks within that sector.
+Zaragoza Avanza bus card (public transit pass) full up-to-date specification, reverse engineered from multiple MIFARE Classic 1K card dumps. This project intends to be a security research paper, publicly available for anyone for free and is not qualified as a guide. You cannot follow this resource as a guide to commit fraud.
 
 Presented to you by [zaragoza ⚡️ nerds](https://discord.gg/NRdBaqv3hB) 🤓
 
-Click here to open the reverse engineering spreadsheet with all the collected data and highlights:
+- [Zaragoza Avanza Bus Transit Pass pwn](#zaragoza-avanza-bus-transit-pass-pwn)
+	- [Getting started](#getting-started)
+		- [Keys](#keys)
+		- [Sectors](#sectors)
+		- [Blocks](#blocks)
+	- [Definitions](#definitions)
+		- [Card ID](#card-id)
+		- [Card type](#card-type)
+		- [Balance](#balance)
+		- [Transaction log](#transaction-log)
+		- [Date](#date)
+		- [Subscription](#subscription)
+	- [Subscription metadata](#subscription-metadata)
+		- [Blocks 5 and 10](#blocks-5-and-10)
+	- [Contributing](#contributing)
+	- [See also](#see-also)
+	- [Acknowledgements](#acknowledgements)
+	- [License](#license)
+	- [Donate](#donate)
 
-<a href="https://docs.google.com/spreadsheets/d/1g89saB1URWRZLWsEJm44vJFTosIDfPkh5u8pfxPWGD0/edit">
-	<img alt="Spreadsheet" src="https://git.hloth.dev/hloth/zgz-avanza/raw/branch/main/docs/spreadsheet.avif" width="600" />
-</a>
 
-See also:
-- [ZGZ Avanza Card Android App](https://git.hloth.dev/hloth/zgz-avanza-card-android)
+## Getting started
 
-## Keys
+The card has 16 sectors, each with 4 blocks of 16 bytes each. Each sector has two keys (Key A and Key B) that control access to the blocks within that sector.
+
+This project can also be used as a JavaScript/TypeScript library by installing it from [npm](www.npmjs.com/package/zgz-avanza):
+
+```bash
+bun add zgz-avanza
+# npm install zgz-avanza
+# yarn install zgz-avanza
+# pnpm install zgz-avanza
+```
+
+or [JSR](https://jsr.io/@hloth/zgz-avanza):
+
+```bash
+bunx jsr add @hloth/zgz-avanza
+# npx jsr add @hloth/zgz-avanza
+# deno add jsr:@hloth/zgz-avanza
+# yarn add jsr:@hloth/zgz-avanza
+# pnpm add jsr:@hloth/zgz-avanza
+```
+
+Then use [index.ts](src/index.ts) as a starting point.
+
+### Keys
 
 | Sectors | Key A          | Key B          |
 | ------- | -------------- | -------------- |
@@ -27,7 +64,9 @@ See also:
 | 9-15    | `A0A1A2A3A4A5` | `B0B1B2B3B4B5` |
 |         |                |                |
 
-## Sectors
+Sectors 0-8 have well-known standard MIFARE Classic keys dumped thanks to an ancient [vulnerability](https://en.wikipedia.org/wiki/MIFARE#MIFARE_Classic) in Crypto-1 algorithm utilized by all MIFARE Classic cards. Sectors 9-15 have default factory keys and seem to be empty.
+
+### Sectors
 
 | Sector | Description                      |
 | ------ | -------------------------------- |
@@ -49,13 +88,13 @@ See also:
 | 15     | Unused                           |
 |        |                                  |
 
-## Blocks
+### Blocks
 
 | Sector | Block | Description                                                                                                                                                                                                                                                                                                               | Template                           | Access Conditions    |
 | ------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
 | 0      | 0     | [00-03] RFID's UID<br>[04] BCC (checksum byte)<br>[05] SAK (always `88` for MIFARE Classic 1K)<br>[15] last two digits of year the card was manufactured in (i.e. `20` for 2020, `25` for 2025)                                                                                                                           | `..,,..,,..880400C8,,0020000000..` | Read-only            |
-|        | 1     | [00-14] Card type (`02699F` for balance cards, `0A9775` for personal expiring cards)<br>[15] XOR of all previous bytes                                                                                                                                                                                                    | `..,,..000000000000000000000000,,` | Only Key B can write |
-|        | 2     | [00-01] ASCII prefix (`4245` for `BE`, `4250` for `BP`)<br>[02-04] Zaragoza card ID number (together forming prefix + number)<br>[05-14] empty, zeroed<br>[15] XOR of all previous bytes                                                                                                                                  | `42,,..,,..00000000000000000000..` | Read-only            |
+|        | 1     | [Card type](#card-type)                                                                                                                                                                                                                                                                                                   | `..,,..000000000000000000000000,,` | Only Key B can write |
+|        | 2     | [Card ID](#card-id)                                                                                                                                                                                                                                                                                                       | `42,,..,,..00000000000000000000..` | Read-only            |
 |        | 3     | [0th sector's trailer block](https://github.com/andrea-peter/nfc_mifare_classic_notes/blob/main/mifare-classic.md#sector-trailer-block)                                                                                                                                                                                   | `04000C0F0903..,,..,,0B02070A0409` | *Trailer*            |
 | 1      | 4     | Empty on top-up cards<br>[00-14] unknown<br>[15] XOR of all previous bytes                                                                                                                                                                                                                                                | `00000000000000000000000000000000` | Only Key B can write |
 |        | 5     | Empty if new card<br>[00-02] `020002`, `0A0100` or `0A0200`<br>[03-04] unknown card-specific constant<br>[05-06] unknown<br>[07] integer<br>[08] either 01 or 02<br>[09] unknown<br>[10-11] [date](#dates)<br>[12] BCD-encoded hour (0-23)<br>[13] BCD-encoded minute<br>[14] BCD-encoded second<br>[15] sequence counter | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
@@ -81,7 +120,7 @@ See also:
 |        | 25    | Empty                                                                                                                                                                                                                                                                                                                     | `00000000000000000000000000000000` | Only Key B can write |
 |        | 26    | Empty                                                                                                                                                                                                                                                                                                                     | `00000000000000000000000000000000` | Only Key B can write |
 |        | 27    | 6th sector's trailer block                                                                                                                                                                                                                                                                                                | `04000C0F0903..,,..,,0B02070A0409` | *Trailer*            |
-| 7      | 28    | [Transaction logs](#transaction-logs); value of block 5 right before overwriting it; each subsequent write adds an entry to blocks 29, then 30, then 32, then 33                                                                                                                                                          | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
+| 7      | 28    | [Transaction logs](#transaction-log); value of block 5 right before overwriting it; each subsequent write adds an entry to blocks 29, then 30, then 32, then 33                                                                                                                                                           | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |        | 29    | See block 28                                                                                                                                                                                                                                                                                                              | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |        | 30    | See block 28                                                                                                                                                                                                                                                                                                              | `020002..,,..,,..,,..,,..,,..,,..` | No restrictions      |
 |        | 31    | 7th sector's trailer block                                                                                                                                                                                                                                                                                                | `04000C0F0903..,,..,,0B02070A0409` | *Trailer*            |
@@ -97,7 +136,25 @@ Value blocks 8, 9 and 34 store a 32-bit integer three times for redundancy: the 
 
 The balance is stored in blocks 8 and 9 for redundancy.
 
-## Balance
+## Definitions
+
+### Card ID
+
+- [00-01] ASCII prefix (`4245` for `BE`, `4250` for `BP`)
+- [02-04] Zaragoza card ID number (together forming prefix + number)
+- [05-14] empty, zeroed
+- [15] XOR of all previous bytes
+
+See [src/id.ts](src/id.ts) for encoder/decoder implementation and [test/id.test.ts] for test cases in JavaScript/TypeScript.
+
+### Card type
+
+- [00-14] Card type (`02699F` for balance cards, `0A9775` for personal expiring cards)
+- [15] XOR of all previous bytes
+
+See [src/type.ts](src/type.ts) for encoder/decoder implementation and [test/type.test.ts] for test cases in JavaScript/TypeScript.
+
+### Balance
 
 €1.00 = 1000 units. For example, a balance of €5.00 would be stored as `8813000077ecffff8813000002fd02fd` in blocks 8 and 9:
 
@@ -115,9 +172,9 @@ The balance is stored in blocks 8 and 9 for redundancy.
 
 Balance on personal unlimited cards is always `00000000FFFFFFFF0000000002FD02FD` (zero).
 
-See [src/balance.ts](src/balance.ts) for encoder/decoder implementation in JavaScript/TypeScript.
+See [src/balance.ts](src/balance.ts) for encoder/decoder implementation and [test/balance.test.ts] for test cases in JavaScript/TypeScript.
 
-## Transaction logs
+### Transaction log
 
 Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
 
@@ -134,28 +191,9 @@ Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (bloc
 - [14] Second (0-59)
 - [15] Sequence counter that increments from 0 to 4 (both ends inclusive) and then loops back to 0 correlating with transactions order
 
-See [src/transaction.ts](src/transaction.ts) for decoder implementation in JavaScript/TypeScript.
+See [src/transaction.ts](src/transaction.ts) for encoder/decoder implementation and [test/transaction.test.ts] for test cases in JavaScript/TypeScript.
 
-## Subscription
-
-- [00-01] Subscription start [date](#dates)
-- [02-03] Subscription end date
-- [04-05] Unknown, appears to be `0000`
-- [06-09] Unknown
-- [10-11] Unknown date, most likely the date of the last usage
-- [12-14] Unknown
-- [15] XOR of all previous bytes
-
-## Subscription metadata
-
-- [00-01] Unknown
-- [02-03] Some [date](#dates)
-- [04-07] Unknown, appears to always be `00210000`
-- [08-09] Validity days (e.g. `016D` for 365 days)
-- [10-14] Unknown, appears to always be `0021000000`
-- [15] XOR of all previous bytes
-
-## Dates
+### Date
 
 Mad respect to [li0ard](https://li0ard.rest/) for figuring out the date encoding!
 
@@ -171,9 +209,32 @@ Examples:
 - Month: `0010` -> 2 (February)
 - Day: `01110` -> 14
 
-See [src/date.ts](src/date.ts) for encoder/decoder implementation in JavaScript/TypeScript.
+See [src/date.ts](src/date.ts) for encoder/decoder implementation and [test/date.test.ts] for test cases in JavaScript/TypeScript.
 
-## Blocks 5 and 10
+### Subscription
+
+[WIP](#contributing)
+
+- [00-01] Subscription start [date](#date)
+- [02-03] Subscription end date
+- [04-05] Unknown, appears to be `0000`
+- [06-09] Unknown
+- [10-11] Unknown date, most likely the date of the last usage
+- [12-14] Unknown
+- [15] XOR of all previous bytes
+
+## Subscription metadata
+
+[WIP](#contributing)
+
+- [00-01] Unknown
+- [02-03] Some [date](#date)
+- [04-07] Unknown, appears to always be `00210000`
+- [08-09] Validity days (e.g. `016D` for 365 days)
+- [10-14] Unknown, appears to always be `0021000000`
+- [15] XOR of all previous bytes
+
+### Blocks 5 and 10
 
 Block 10 stores complimentary data to block 5, but unknown how it correlates.
 
@@ -220,6 +281,36 @@ someid = always 020002 for top up cards, always 0A0200 for unlimited cards
 	xr = XOR of all previous bytes
  prJrn = previous journey: line number (decimal) and direction (either `01` or `02`), always 0000 on first ever transaction
 ```
+
+See [src/block10.ts](src/block10.ts) for encoder/decoder implementation and [test/block10.test.ts] for test cases in JavaScript/TypeScript.
+
+## Contributing
+
+If you'd like to contribute your bus card dump, please reach out directly to the author of this project ([@hloth](https://hloth.dev)) through any of social media. 
+
+Contributions are non-traceable, 100% safe and do not modify card contents, simply dumping card contents does not make it detectable or punishable, also dumps themselves cannot be used to affect card remotely. **Dumping contents of your card, inspecting it and even sharing is totally legal.** It's safe and no identifiable information will be published.
+
+Any dumps are appreciated but these are currently highly sought after:
+
+- Personal unlimited cards
+- Social benefits/discounted cards
+- Any card that contributor can provide exact trips dates and time, line numbers and stops locations
+
+If you'd like to contribute to the project's development, consider the following resources:
+
+- [MifareClassicTool for Android](https://github.com/ikarus23/MifareClassicTool)
+
+The spreadsheet with publicly disclosed dumps and highlights:
+
+<a href="https://docs.google.com/spreadsheets/d/1g89saB1URWRZLWsEJm44vJFTosIDfPkh5u8pfxPWGD0/edit">
+	<img alt="Spreadsheet" src="https://git.hloth.dev/hloth/zgz-avanza/raw/branch/main/docs/spreadsheet.avif" width="600" />
+</a>
+
+An extended version of this spreadsheet is held private due to contributors wish to remain anonymous.
+
+## See also
+
+- [ZGZ Avanza Card Android App](https://git.hloth.dev/hloth/zgz-avanza-card-android)
 
 ## Acknowledgements
 

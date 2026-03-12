@@ -36,7 +36,7 @@ export function decodeBalance(block: Uint8Array): number {
 	const le = value.subarray(0, 4);
 	const aComplement = value.subarray(4, 8);
 	if (!le.every((byte, index) => byte === value[index + 8])) {
-		throw new Error("Invalid balance block: bytes 0-3 and 8-11 do not match");
+		throw new Error("Invalid balance block: bytes 00-03 and 08-11 do not match");
 	}
 	const balance = le.reduce(
 		(acc, byte, index) => acc + (byte << (index * 8)),
@@ -45,7 +45,7 @@ export function decodeBalance(block: Uint8Array): number {
 	const bComplement = le.map((byte) => ~byte & 0xff);
 	if (!bComplement.every((byte, index) => byte === aComplement[index])) {
 		throw new Error(
-			"Invalid balance block: bytes 4-7 are not the complement of bytes 0-3",
+			"Invalid balance block: bytes 04-07 are not the complement of bytes 00-03",
 		);
 	}
 	return balance;

@@ -30,7 +30,7 @@ export function decodeId(block: Uint8Array): string {
 	}
 	const idPrefix = String.fromCharCode(...block.slice(0, 2));
 	let idNumber = block.slice(2, 15);
-	const aXor = block.slice(15, 16)[0];
+	const aXor = block[15];
 	const bXor = block.slice(0, 15).reduce((acc, byte) => acc ^ byte, 0);
 	if (aXor === undefined) {
 		throw new Error(`Invalid checksum byte: ${aXor}`);

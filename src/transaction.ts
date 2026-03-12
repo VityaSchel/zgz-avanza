@@ -8,10 +8,12 @@ export type Transaction = {
 	fareId: number;
 	/** Starts from 1 */
 	consecutivePaymentsCounter: number;
+	/** 2 bytes */
 	unknownVar1: Uint8Array<ArrayBuffer>;
 	line: number;
 	/** Always either 1 or 2 */
 	direction: number;
+	/** 1 byte */
 	unknownVar2: Uint8Array<ArrayBuffer>;
 	createdAt: {
 		year: number;
@@ -43,7 +45,7 @@ export function encodeTransaction({
 }: Transaction): Uint8Array {
 	if (!transactionHeaders.includes(header)) {
 		throw new Error(
-			`Unknown transaction record marker: ${header.toString(16)} (bytes 0-2)`,
+			`Unknown transaction record marker: ${header.toString(16)} (bytes 00-02)`,
 		);
 	}
 	if (
@@ -51,11 +53,11 @@ export function encodeTransaction({
 		consecutivePaymentsCounter < 1
 	) {
 		throw new Error(
-			`Invalid consecutive payments counter: ${consecutivePaymentsCounter} (byte 4)`,
+			`Invalid consecutive payments counter: ${consecutivePaymentsCounter} (byte 04)`,
 		);
 	}
 	if (direction !== 1 && direction !== 2) {
-		throw new Error(`Invalid transaction direction: ${direction} (byte 8)`);
+		throw new Error(`Invalid transaction direction: ${direction} (byte 08)`);
 	}
 	const date = encodeDate({ year, month, day });
 	if (hour > 24) {
@@ -104,12 +106,12 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 		.reduce((acc, byte) => (acc << 8) | byte, 0);
 	if (!transactionHeaders.includes(header)) {
 		throw new Error(
-			`Unknown transaction record marker: ${header.toString(16)} (bytes 0-2)`,
+			`Unknown transaction record marker: ${header.toString(16)} (bytes 00-02)`,
 		);
 	}
-	const fareId = transaction.slice(3, 4)[0];
+	const fareId = transaction[3];
 	if (fareId === undefined) {
-		throw new Error(`Invalid fare id: ${fareId} (byte 3)`);
+		throw new Error(`Invalid fare id: ${fareId} (byte 03)`);
 	}
 	const consecutivePaymentsCounter = transaction.slice(4, 5)[0];
 	if (
@@ -117,34 +119,34 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 		consecutivePaymentsCounter < 1
 	) {
 		throw new Error(
-			`Invalid consecutive payments counter: ${consecutivePaymentsCounter} (byte 4)`,
+			`Invalid consecutive payments counter: ${consecutivePaymentsCounter} (byte 04)`,
 		);
 	}
 	const unknownVar1 = transaction.slice(5, 7);
-	const line = transaction.slice(7, 8)[0];
+	const line = transaction[7];
 	if (line === undefined) {
-		throw new Error(`Invalid transaction line number: ${line} (byte 7)`);
+		throw new Error(`Invalid transaction line number: ${line} (byte 07)`);
 	}
-	const direction = transaction.slice(8, 9)[0];
+	const direction = transaction[8];
 	if (direction === undefined || (direction !== 1 && direction !== 2)) {
-		throw new Error(`Invalid transaction direction: ${direction} (byte 8)`);
+		throw new Error(`Invalid transaction direction: ${direction} (byte 08)`);
 	}
 	const unknownVar2 = transaction.slice(9, 10);
 	const date = transaction.slice(10, 12);
 	const { year, month, day } = decodeDate(date);
-	const hour = transaction.slice(12, 13)[0];
+	const hour = transaction[12];
 	if (hour === undefined || hour > 24) {
 		throw new Error(`Invalid transaction hour: ${hour} (byte 12)`);
 	}
-	const minute = transaction.slice(13, 14)[0];
+	const minute = transaction[13];
 	if (minute === undefined || minute > 60) {
 		throw new Error(`Invalid transaction minute: ${minute} (byte 13)`);
 	}
-	const second = transaction.slice(14, 15)[0];
+	const second = transaction[14];
 	if (second === undefined || second > 60) {
 		throw new Error(`Invalid transaction second: ${second} (byte 14)`);
 	}
-	const seq = transaction.slice(15, 16)[0];
+	const seq = transaction[15];
 	if (seq === undefined || seq < 0 || seq > 4) {
 		throw new Error(`Invalid transaction sequence number: ${seq} (byte 15)`);
 	}
