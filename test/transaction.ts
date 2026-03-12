@@ -1,5 +1,6 @@
 import { decodeTransaction, type Transaction } from "../src/transaction";
 import chalk from "chalk";
+import { tests } from "./transaction.test";
 
 export function log(transaction: Transaction) {
 	console.log(
@@ -30,18 +31,6 @@ export function log(transaction: Transaction) {
 	);
 }
 
-console.log("BE322743");
-log(decodeTransaction(Uint8Array.fromHex("020002F8010320D201FE2AD8132D1201")));
-log(decodeTransaction(Uint8Array.fromHex("020002F80105DCD2026B2AD90D333B02")));
-log(decodeTransaction(Uint8Array.fromHex("020002F80102BCD201992AD910260D03")));
-console.log("---");
-console.log("BE322742");
-log(decodeTransaction(Uint8Array.fromHex("020002F8010640D202252ADC091B2F01")));
-console.log("---");
-console.log("BE739977");
-log(decodeTransaction(Uint8Array.fromHex("0200022601817E1F0211344D10163003")));
-log(decodeTransaction(Uint8Array.fromHex("020002260180011F0112344D14100704")));
-log(decodeTransaction(Uint8Array.fromHex("02000226018001230209344E0C051B00")));
-log(decodeTransaction(Uint8Array.fromHex("0200022601817F160105344E0D1F2001")));
-log(decodeTransaction(Uint8Array.fromHex("0200022601801E23020934540F153502")));
-log(decodeTransaction(Uint8Array.fromHex("020002260180CE16010D3454102D2403")));
+for (const t of tests) {
+	console.log(decodeTransaction(Uint8Array.fromHex(t.encoded)));
+}
