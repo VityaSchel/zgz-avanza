@@ -8,3 +8,13 @@ export {
 	type Transaction,
 } from "./transaction";
 export { encodeCardType, decodeCardType, CardType } from "./type";
+export {
+	encodeSubscription,
+	decodeSubscription,
+	type Subscription,
+} from "./subscription";
+export {
+	encodeSubscriptionMetadata,
+	decodeSubscriptionMetadata,
+	type SubscriptionMetadata,
+} from "./subscription-metadata";

@@ -1,14 +1,8 @@
-import { decodeDate, encodeDate } from "./date";
+import { decodeDate, encodeDate, type Date16Bit } from "./date";
+import { decodeTime, encodeTime, type Time } from "./time";
 
 export type Block10 = {
-	createdAt: {
-		year: number;
-		month: number;
-		day: number;
-		hour: number;
-		minute: number;
-		second: number;
-	};
+	createdAt: Date16Bit & Time;
 	/** 2 bytes */
 	unknownVar1: Uint8Array<ArrayBuffer>;
 	line?: number;
@@ -22,7 +16,7 @@ export type Block10 = {
 };
 
 /**
- * Encodes transaction to a 16-byte record
+ * Encodes transaction to a 16-byte record.
  * @param transaction An object with the transaction fields
  * @returns The 16-byte transaction record
  */
@@ -48,15 +42,7 @@ export function encodeBlock10({
 		throw new Error(`Invalid transaction direction: ${direction}`);
 	}
 	const date = encodeDate({ year, month, day });
-	if (hour > 24) {
-		throw new Error(`Invalid transaction hour: ${hour}`);
-	}
-	if (minute > 60) {
-		throw new Error(`Invalid transaction minute: ${minute}`);
-	}
-	if (second > 60) {
-		throw new Error(`Invalid transaction second: ${second}`);
-	}
+	const time = encodeTime({ hour, minute, second });
 	if (unknownVar1.length !== 2) {
 		throw new Error(
 			`Invalid transaction unknownVar1 length: ${unknownVar1.length}`,
@@ -69,9 +55,7 @@ export function encodeBlock10({
 	block[0] = previousTransactionLine || 0;
 	block[1] = previousTransactionDirection || 0;
 	block.set(date, 2);
-	block[4] = hour;
-	block[5] = minute;
-	block[6] = second;
+	block.set(time, 4);
 	block.set(unknownVar1, 7);
 	block[9] = line || 0;
 	block[10] = direction || 0;
@@ -82,7 +66,7 @@ export function encodeBlock10({
 }
 
 /**
- * Decodes block 10 from a 16-byte record
+ * Decodes block 10 from a 16-byte record.
  * @param block The 16-byte block record
  * @returns An object with the decoded block 10 fields
  */
@@ -112,18 +96,8 @@ export function decodeBlock10(block: Uint8Array): Block10 {
 		previousTransactionDirection = undefined;
 	const date = block.slice(2, 4);
 	const { year, month, day } = decodeDate(date);
-	const hour = block[4];
-	if (hour === undefined || hour > 24) {
-		throw new Error(`Invalid block hour: ${hour} (byte 04)`);
-	}
-	const minute = block[5];
-	if (minute === undefined || minute > 60) {
-		throw new Error(`Invalid block minute: ${minute} (byte 05)`);
-	}
-	const second = block[6];
-	if (second === undefined || second > 60) {
-		throw new Error(`Invalid block second: ${second} (byte 06)`);
-	}
+	const time = block.slice(4, 7);
+	const { hour, minute, second } = decodeTime(time);
 	const unknownVar1 = block.slice(7, 9);
 	let line = block[9];
 	if (line === undefined) {

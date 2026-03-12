@@ -1,4 +1,5 @@
-import { decodeDate, encodeDate } from "./date";
+import { decodeDate, encodeDate, type Date16Bit } from "./date";
+import { decodeTime, encodeTime, type Time } from "./time";
 
 const transactionHeaders = [0x020002, 0x020000, 0x0a0200, 0x0a0100];
 
@@ -15,14 +16,7 @@ export type Transaction = {
 	direction: number;
 	/** 1 byte */
 	unknownVar2: Uint8Array<ArrayBuffer>;
-	createdAt: {
-		year: number;
-		month: number;
-		day: number;
-		hour: number;
-		minute: number;
-		second: number;
-	};
+	createdAt: Date16Bit & Time;
 	/** Starts with 0 and increments with each transaction until 4 (inclusive), after that loops back to 0 */
 	sequence: number;
 };
@@ -60,15 +54,7 @@ export function encodeTransaction({
 		throw new Error(`Invalid transaction direction: ${direction} (byte 08)`);
 	}
 	const date = encodeDate({ year, month, day });
-	if (hour > 24) {
-		throw new Error(`Invalid transaction hour: ${hour} (byte 12)`);
-	}
-	if (minute > 60) {
-		throw new Error(`Invalid transaction minute: ${minute} (byte 13)`);
-	}
-	if (second > 60) {
-		throw new Error(`Invalid transaction second: ${second} (byte 14)`);
-	}
+	const time = encodeTime({ hour, minute, second });
 	if (sequence < 0 || sequence > 4) {
 		throw new Error(
 			`Invalid transaction sequence number: ${sequence} (byte 15)`,
@@ -85,9 +71,7 @@ export function encodeTransaction({
 	transaction[8] = direction;
 	transaction.set(unknownVar2, 9);
 	transaction.set(date, 10);
-	transaction[12] = hour;
-	transaction[13] = minute;
-	transaction[14] = second;
+	transaction.set(time, 12);
 	transaction[15] = sequence;
 	return transaction;
 }
@@ -134,18 +118,8 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 	const unknownVar2 = transaction.slice(9, 10);
 	const date = transaction.slice(10, 12);
 	const { year, month, day } = decodeDate(date);
-	const hour = transaction[12];
-	if (hour === undefined || hour > 24) {
-		throw new Error(`Invalid transaction hour: ${hour} (byte 12)`);
-	}
-	const minute = transaction[13];
-	if (minute === undefined || minute > 60) {
-		throw new Error(`Invalid transaction minute: ${minute} (byte 13)`);
-	}
-	const second = transaction[14];
-	if (second === undefined || second > 60) {
-		throw new Error(`Invalid transaction second: ${second} (byte 14)`);
-	}
+	const time = transaction.slice(12, 15);
+	const { hour, minute, second } = decodeTime(time);
 	const seq = transaction[15];
 	if (seq === undefined || seq < 0 || seq > 4) {
 		throw new Error(`Invalid transaction sequence number: ${seq} (byte 15)`);

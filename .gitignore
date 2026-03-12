@@ -4,3 +4,7 @@ node_modules
 dist
 test/transactions-private.ts
 test/test.ts
+
+# No publicly disclosed dumps to test against
+test/subscription.test.ts
+test/subscription-metadata.test.ts

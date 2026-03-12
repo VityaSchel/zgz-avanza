@@ -1,6 +1,6 @@
 import { decodeTransaction, type Transaction } from "../src/transaction";
 import chalk from "chalk";
-import { tests } from "./transaction.test";
+import { tests } from "./transactions-tests";
 
 // temporary dump viewer & pretty printer
 // more dumps are in transactions-private.ts importing this file to automatically run these tests too

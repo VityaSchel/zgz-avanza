@@ -1,5 +1,5 @@
 /**
- * Decode balance in dump
+ * Decode balance in dump.
  * @param units Integer between 0 and 2147483647. €1.00 = 1000 units.
  * @return Encoded balance for block 8 and 9
  */
@@ -24,7 +24,7 @@ export function encodeBalance(units: number): Uint8Array {
 }
 
 /**
- * Decode balance from block 8 or 9
+ * Decode balance from block 8 or 9.
  * @param block The block data (16 bytes)
  * @return The balance in units (0 to 2147483647). 1000 units = €1.00.
  */
@@ -36,7 +36,9 @@ export function decodeBalance(block: Uint8Array): number {
 	const le = value.subarray(0, 4);
 	const aComplement = value.subarray(4, 8);
 	if (!le.every((byte, index) => byte === value[index + 8])) {
-		throw new Error("Invalid balance block: bytes 00-03 and 08-11 do not match");
+		throw new Error(
+			"Invalid balance block: bytes 00-03 and 08-11 do not match",
+		);
 	}
 	const balance = le.reduce(
 		(acc, byte, index) => acc + (byte << (index * 8)),

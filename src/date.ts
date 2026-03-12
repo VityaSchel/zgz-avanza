@@ -1,3 +1,5 @@
+import { assertInRange } from "./utils";
+
 export type Date16Bit = {
 	/** 2000-2127 */
 	year: number;
@@ -19,7 +21,9 @@ export function decodeDate(data: Uint8Array): Date16Bit {
 
 	const year = ((dateInt >> 9) & 0x7f) + 2000;
 	const month = (dateInt >> 5) & 0x0f;
+	assertInRange({ month }, 1, 12);
 	const day = dateInt & 0x1f;
+	assertInRange({ day }, 1, 31);
 
 	return { year, month, day };
 }
@@ -31,14 +35,11 @@ export function decodeDate(data: Uint8Array): Date16Bit {
  */
 export function encodeDate(date: Date16Bit): Uint8Array {
 	const { year, month, day } = date;
-	if (year < 2000 || year > 2127)
-		throw new Error("Year must be between 2000 and 2127");
-	if (month < 1 || month > 12)
-		throw new Error("Month must be between 1 and 12");
-	if (day < 1 || day > 31) throw new Error("Day must be between 1 and 31");
+	assertInRange({ year }, 2000, 2000 + 2 ** 7 - 1);
+	assertInRange({ month }, 1, 12);
+	assertInRange({ day }, 1, 31);
 
-	const dateInt =
-		((year - 2000) << 9) | (((month) & 0x0f) << 5) | (day & 0x1f);
+	const dateInt = ((year - 2000) << 9) | ((month & 0x0f) << 5) | (day & 0x1f);
 
 	return new Uint8Array([dateInt >> 8, dateInt & 0xff]);
 }

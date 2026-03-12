@@ -1,6 +1,6 @@
 {
 	"name": "zgz-avanza",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"description": "Zaragoza Avanza transit pass card encoder & decoder",
 	"homepage": "https://git.hloth.dev/hloth/zgz-avanza",
 	"bugs": {
