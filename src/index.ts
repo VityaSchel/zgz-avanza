@@ -7,7 +7,7 @@ export {
 	decodeTransaction,
 	type Transaction,
 } from "./transaction";
-export { encodeCardType, decodeCardType, CardType } from "./type";
+export { encodeCardType, decodeCardType, CardTypeEnum } from "./type";
 export {
 	encodeSubscription,
 	decodeSubscription,

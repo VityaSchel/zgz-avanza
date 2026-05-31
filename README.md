@@ -20,6 +20,9 @@ Presented to you by [zaragoza ⚡️ nerds](https://discord.gg/NRdBaqv3hB) 🤓
 		- [Card type](#card-type)
 		- [Balance](#balance)
 		- [Transaction log](#transaction-log)
+			- [Ride (spend)](#ride-spend)
+			- [Top up](#top-up)
+			- [All types](#all-types)
 		- [Date](#date)
 		- [Subscription metadata](#subscription-metadata)
 		- [Subscription](#subscription)
@@ -178,13 +181,23 @@ See [src/balance.ts](./src/balance.ts) for encoder/decoder implementation and [t
 
 Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (blocks 32-33). Each log entry is 16 bytes, so each block can store one log entry.
 
+#### Ride (spend)
+
 - [00-02] Always `020002` for top up cards and `0A0200` for personal cards; sometimes `020000` for top up cards and `0A0100` for personal cards, cause unknown
-- [03] Unknown constant, could be a fare id or season id, always `00` on personal cards
+- [03] Unknown constant, could be a fare id or season id, always `00` on personal cards, `88` for top ups
 - [04] Consecutive payments counter starting from 1 (for transactions paid in the same terminal in a row)
 - [05-06] Unknown, could be terminal id or stop id
 - [07] Most likely bus line number, but unknown how to decode lines > 255 and trams
 - [08] Line direction (always either `01` or `02`)
 - [09] Unknown, could be number of times the bus has reversed/terminal restarted or number of stops passed by bus
+
+#### Top up
+
+- [00-02] Always `020013`
+- [03-09] Unknown, e.g. `88001f2c000800` (for €5.00 top up)
+
+#### All types
+
 - [10-11] Transaction [date](#dates)
 - [12] Hour (0-23)
 - [13] Minute (0-59)

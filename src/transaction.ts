@@ -90,7 +90,7 @@ export function decodeTransaction(transaction: Uint8Array): Transaction {
 		.reduce((acc, byte) => (acc << 8) | byte, 0);
 	if (!transactionHeaders.includes(header)) {
 		throw new Error(
-			`Unknown transaction record marker: ${header.toString(16)} (bytes 00-02)`,
+			`Unknown transaction record marker: ${header.toString(16)} (bytes 00-02) [${transaction.toHex()}]`,
 		);
 	}
 	const fareId = transaction[3];
