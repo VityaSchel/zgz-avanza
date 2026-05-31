@@ -186,10 +186,19 @@ Transaction logs are stored in sectors 1 (block 5), 7 (blocks 28-30) and 8 (bloc
 - [00-02] Always `020002` for top up cards and `0A0200` for personal cards; sometimes `020000` for top up cards and `0A0100` for personal cards, cause unknown
 - [03] Unknown constant, could be a fare id or season id, always `00` on personal cards, `88` for top ups
 - [04] Consecutive payments counter starting from 1 (for transactions paid in the same terminal in a row)
-- [05-06] Unknown, could be terminal id or stop id
+- [05-06] With 09 most likely stop ID
 - [07] Most likely bus line number, but unknown how to decode lines > 255 and trams
 - [08] Line direction (always either `01` or `02`)
-- [09] Unknown, could be number of times the bus has reversed/terminal restarted or number of stops passed by bus
+- [09] With 05-06 most likely stop ID
+
+| Line | 05-06 bytes | 09 byte | Actual [stop ID](https://www.zaragoza.es/sede/servicio/urbanismo-infraestructuras/transporte-urbano/linea-autobus) |
+| ---- | ----------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| 22   | `81AF`      | `12`    | 676                                                                                                                |
+| 35   | `804C`      | `11`    | 471                                                                                                                |
+| 31   | `81DB`      | `0B`    | 3071                                                                                                               |
+| 35   | `8099`      | `09`    | 707                                                                                                                |
+| 31   | `807E`      | `08`    | 147                                                                                                                |
+| 22   | `81C8`      | `0D`    | 434                                                                                                                |
 
 #### Top up
 
